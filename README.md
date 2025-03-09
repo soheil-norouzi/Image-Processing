@@ -10,6 +10,7 @@ The script:
 
 ## 🖥 Example Output
 Below is an example of the **original image** and its **bit-plane decomposition**:
+![Final Result](results/bit_planes.png) 
 ![QWERTY](https://github.com/user-attachments/assets/48530897-c8b9-461c-8757-d0d50b6b2269)
 ![image](https://github.com/user-attachments/assets/2aab7af9-152a-4cb8-ac44-9efcf1b84ba6)
 ![image](https://github.com/user-attachments/assets/c688f8f9-ff79-487b-acbd-b234d3ad8ac7)
