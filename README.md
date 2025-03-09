@@ -6,10 +6,10 @@ This project demonstrates **Bit-Plane Slicing**, a technique in image processing
 The script:
 - Loads a grayscale image.
 - Extracts **8 bit-planes** using **bitwise operations**.
-- Displays the **original image + 8 bit-planes** in a **3×3 grid**.
+- Displays the **original image + 8 bit-planes + reconstructed**.
 
 ## Example Output
-Below is an example of the **original image** and its **bit-plane decomposition**:
+Below is an example of the **original image** and its **bit-plane decomposition** and **reconstructed image**:
 ### Original Image
 ![QWERTY](https://github.com/user-attachments/assets/48530897-c8b9-461c-8757-d0d50b6b2269)
 <br>
