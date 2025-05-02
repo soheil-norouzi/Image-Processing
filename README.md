@@ -68,7 +68,28 @@ You can fine-tune these parameters in the script to suit your specific use case.
 - OpenCV
 - NumPy
 
-Install them via pip:
 
-```bash
 pip install opencv-python numpy
+
+# Frequency Domain Laplacian Image Enhancement
+
+This repository contains a Python script that performs image enhancement using the Laplacian operator in the frequency domain. The script applies a Laplacian filter to the Fourier transform of an input image, enhances it, and visualizes the process with a 3x3 plot.
+
+## Overview
+
+The script implements image enhancement based on the following frequency domain Laplacian operation:
+- Computes the 2D Fast Fourier Transform (FFT) of the input image.
+- Applies a Laplacian filter \( H(u, v) = -4\pi^2 D^2(u, v) \), where \( D(u, v) \) is the distance from the center in the frequency domain.
+- Enhances the image using \( g(x, y) = \mathcal{F}^{-1} [(1 + H(u, v)) F(u, v)] \).
+- Visualizes the input image, magnitude spectrum, Laplacian, filtered spectrum, and enhanced image in a 3x3 grid.
+
+## Requirements
+
+- Python 3.x
+- OpenCV (`opencv-python`)
+- NumPy (`numpy`)
+- Matplotlib (`matplotlib`)
+
+Install the required packages using pip:
+```bash
+pip install opencv-python numpy matplotlib
