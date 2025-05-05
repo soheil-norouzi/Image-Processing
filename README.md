@@ -91,5 +91,27 @@ The script implements image enhancement based on the following frequency domain 
 - Matplotlib (`matplotlib`)
 
 Install the required packages using pip:
+pip install opencv-python numpy matplotlib
+
+# Frequency Domain Image Enhancement with Mask (hp)
+
+This code contains a Python script that performs image enhancement in the frequency domain using a Laplacian-based high-pass filter and a masking technique. The script enhances the image by subtracting a Laplacian-modified version and adding it back with a scaling factor.
+
+## Overview
+
+The script implements image enhancement based on the following equations:
+- Laplacian filter: \( H(u, v) = -4\pi^2 \cdot 1e-4 \cdot D(u, v) \), where \( D(u, v) \) is the distance in the frequency domain.
+- Masked image: \( g_{mask}(x, y) = f(x, y) - f_{LP}(x, y) \), where \( f_{LP}(x, y) = \mathcal{F}^{-1} [H(u, v) F(u, v)] \).
+- Enhanced image: \( g(x, y) = f(x, y) + k g_{mask}(x, y) \), with \( k \) as a scaling factor.
+- Visualizes the input image, masked image, and enhanced image in a 1x3 plot.
+
+## Requirements
+
+- Python 3.x
+- OpenCV (`opencv-python`)
+- NumPy (`numpy`)
+- Matplotlib (`matplotlib`)
+
+Install the required packages using pip:
 ```bash
 pip install opencv-python numpy matplotlib
