@@ -6,43 +6,44 @@ import cv2
 import torch
 # import xgboost as xgb
 
-yolo = YOLO('yolov8n.pt')
+yolo = YOLO('yolov8s.pt') # yolov8s.pt , downloads the pre-trained weights
 if torch.cuda.is_available():
-    yolo.to('cuda')
+    yolo.to('cuda') # move the YOLO model computation to the GPU for faster inference.
     print("YOLO model moved to GPU.")
 else:
     print("CUDA not available. YOLO model will run on CPU.")
 
 print(f"YOLO model device: {yolo.device}")
 
-#xgb_model = joblib.load('/home/soheil/Downloads/fall_detection_model.pkl')
-try:
+xgb_model = joblib.load('/home/soheil/Downloads/fall_detection_model.pkl')
+"""try:
     xgb_model = joblib.load("/home/soheil/Downloads/fall_detection_model_v2.pkl")
     print("Fall detection model loaded successfully.")
 except FileNotFoundError:
     print("Error: 'fall_model.pkl' not found. Please ensure the model file is in the correct directory.")
     exit()
-
-mp_pose = mp.solutions.pose
+"""
+mp_pose = mp.solutions.pose # accesses the pose solution from MediaPipe
 pose = mp_pose.Pose(static_image_mode=False) # initialize the pose estimation model
-mp_drawing = mp.solutions.drawing_utils # draw the pose landmarksb
+mp_drawing = mp.solutions.drawing_utils # draw the pose landmarksb, allow to draw the detected landmarks and their connections directly onto the image
 
 # def to extract pose landmarks
 def extract_pose_landmarks(image):
-    rgb_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = pose.process(rgb_img)
+    rgb_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Convert image from BGR to RGB
+    results = pose.process(rgb_img) # process the image with the MediaPipe Pose model.
     if not results.pose_landmarks:
-        return None, None ## add another None
+        return None, None # features and landmarks
     
-    landmarks = results.pose_landmarks.landmark
+    landmarks = results.pose_landmarks.landmark # get the list of individual landmark objects.
     features = []
-    for lm in landmarks:
+    for lm in landmarks: # iterate through each landmark
         features.extend([lm.x, lm.y, lm.z, lm.visibility])
-    if len(features) != 132:
+    if len(features) != 132: # 33 landmarks * 4 attributes = 132 features
         print(f"Warning: Expected 132 features, but got {len(features)}. Skipping this person.")
         return None, None
     
-    return np.array(features).reshape(1,-1), results.pose_landmarks
+    return np.array(features).reshape(1,-1), results.pose_landmarks # reshape(1, -1): one row, and as many columns as necessary
+    #because xgb_model.predict() method expects a 2D array
     #return features
     
 webcam = cv2.VideoCapture(0)
@@ -50,11 +51,14 @@ webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
 while webcam.isOpened():
-    ret, frame = webcam.read()
+    ret, frame = webcam.read() # ret: it indicates whether the frame was successfully read from the video source, # frame: is the actual image data
     if not ret:
         break
     frame = cv2.flip(frame, 1) # mirror horizontally
 
+    # perform object detection with YOLO.
+    # classes = [0]: detect only class ID 0, which corresponds to 'person' in COCO dataset used by YOLOv8.
+    # conf = 0.4: Only detect objects with a confidence score of 0.4 or higher.
     results = yolo.predict(frame, classes = [0], conf = 0.4, verbose = False)
     detections = results[0].boxes.xyxy.cpu().numpy()   # extract bounding box coordinates (x1, y1, x2, y2)
 
@@ -62,12 +66,12 @@ while webcam.isOpened():
         x1, y1, x2, y2 = map(int, det) # converts coordinates to integers
         x1 = max(0, x1)
         y1 = max(0, y1)
-        x2 = min(frame.shape[1], x2)
-        y2 = min(frame.shape[0], y2)
+        x2 = min(frame.shape[1], x2) # frame.shape[1] : width
+        y2 = min(frame.shape[0], y2) # frame.shape[0] : height
         
         person_img = frame[y1:y2, x1:x2] # extract region of interest of person image
         
-        if person_img.shape[0] == 0 or person_img.shape[1] == 0 or person_img.shape[0] < 50 or person_img.shape[1] < 50:
+        if person_img.shape[0] == 0 or person_img.shape[1] == 0 or person_img.shape[0] < 50 or person_img.shape[1] < 50: # ensures ROI is not empty or too small
             continue
 
         features, pose_landmarks_to_draw = extract_pose_landmarks(person_img) # call the function to extract pose landmark from person ROI
@@ -77,28 +81,30 @@ while webcam.isOpened():
         # if pose landmarks were extracted successfuly  --> predict fall staus using pretrained xgboost model
         if features is not None:
             try:
-                prediction = xgb_model.predict(features)[0]
+                prediction = xgb_model.predict(features)[0] # .predict() returns an array, so [0] gets the first (and only) prediction.
                 label = "Fall" if prediction == "fall" or prediction == 1 else "Normal"
                 color = (0, 0, 255) if label == "Fall" else (0, 255, 0)
 
                 # draw mediapipe pose landmarks on the original frame
-                roi_display = np.zeros_like(person_img)
-                mp_drawing.draw_landmarks(
+                roi_display = np.zeros_like(person_img) # create a black image (ROI sized) to draw landmarks on temporarily
+                mp_drawing.draw_landmarks( # draw the MediaPipe pose landmarks and connections on this ROI image.
                     roi_display,
-                    pose_landmarks_to_draw,
-                    mp_pose.POSE_CONNECTIONS,
+                    pose_landmarks_to_draw, # the landmarks object returned by MediaPipe
+                    mp_pose.POSE_CONNECTIONS, # the connections object returned by MediaPipe
                     mp_drawing.DrawingSpec(color = (0, 0, 255), thickness = 2, circle_radius = 2), # red dots
                     mp_drawing.DrawingSpec(color = (255, 255, 255), thickness = 2, circle_radius = 2), # white lines
                 )
-                frame[y1:y2, x1:x2] = cv2.addWeighted(frame[y1:y2, x1:x2], 1, roi_display, 0.7, 0)
+                # cv2.addWeighted blends two images. 1 for frame, 0.7 for roi_display
+                frame[y1:y2, x1:x2] = cv2.addWeighted(frame[y1:y2, x1:x2], 1, roi_display, 0.7, 0) 
 
-            except Exception as e:
+            except Exception as e: # catch any errors during prediction or drawing.
                 label = "prediction error"
                 color = (0 , 165, 255)
                 print(f'prediction error for person: {e}')
 
-        cv2.rectangle(frame, (x1,y1), (x2, y2), color, 2) # draw a bounding box around the person
-        cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+        # draw a bounding box around the detected person on the original frame.
+        cv2.rectangle(frame, (x1,y1), (x2, y2), color, 2) # (frame, top-left, bottom-right, color, thickness)
+        cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2) # # (frame, text, position, font, scale, color, thickness)
     
     cv2.imshow("Multi-Person Fall Detection", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
