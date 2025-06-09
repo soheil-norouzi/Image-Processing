@@ -115,3 +115,42 @@ The script implements image enhancement based on the following equations:
 Install the required packages using pip:
 ```bash
 pip install opencv-python numpy matplotlib
+
+---
+
+## CIFAR-10 Image Classification with CNN
+
+This repository contains a Python script for classifying images from the **CIFAR-10** dataset using a **Convolutional Neural Network (CNN)**. The CIFAR-10 dataset consists of 60,000 $32 \times 32$ color images across 10 distinct classes, with 6,000 images per class. This project serves as an excellent starting point for understanding how CNNs are applied to image classification tasks.
+
+---
+
+## Features
+
+* **CNN Architecture:** A fundamental CNN model built using **TensorFlow/Keras**.
+* **Data Preprocessing:** Handles automatic loading of the CIFAR-10 dataset and normalizes pixel values.
+* **Training & Evaluation:** Provides the necessary setup to train the model and evaluate its performance on a held-out test set.
+* **Performance Visualization:**
+    * Plots **training and validation accuracy** over epochs to monitor learning progress.
+    * Generates a **confusion matrix** to offer a detailed breakdown of per-class classification performance, highlighting where the model might be making mistakes.
+    * Outputs a **classification report** with precision, recall, and F1-score for each class.
+
+---
+
+## Getting Started
+
+Follow these steps to set up and run the CIFAR-10 CNN classifier on your local machine.
+
+### Prerequisites
+
+Ensure you have **Python 3.x** installed. The project relies on the following key libraries:
+
+* **TensorFlow:** For building and training the neural network.
+* **Matplotlib:** For plotting training history.
+* **Scikit-learn:** For generating the confusion matrix and classification report.
+* **Seaborn:** For enhanced visualization of the confusion matrix.
+* **Numpy:** For numerical operations.
+
+You can install all necessary libraries using `pip`:
+
+```bash
+pip install tensorflow matplotlib scikit-learn seaborn numpy
