@@ -115,7 +115,7 @@ The script implements image enhancement based on the following equations:
 Install the required packages using pip:
 ```bash
 pip install opencv-python numpy matplotlib
-
+```
 ---
 
 ## CIFAR-10 Image Classification with CNN
