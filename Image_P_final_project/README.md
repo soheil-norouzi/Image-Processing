@@ -20,7 +20,7 @@ This repository provides a complete pipeline for **real-time human fall detectio
 
 ### 1. Clone the repository
 
-git clone https://github.com/your-username/fall-detection.git
+git clone https://github.com/soheil-norouzi/fall-detection.git
 cd fall-detection
 
 2. Install requirements
